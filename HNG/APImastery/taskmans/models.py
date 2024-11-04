@@ -33,14 +33,22 @@ class Task(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     updatedAt = models.DateTimeField(auto_now=True)
     priority = models.CharField(max_length=1, choices=PRIORITY)
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tasks')
     assignedTo = models.ForeignKey(User, related_name='assigned_tasks', on_delete=models.CASCADE)
     tags = models.JSONField()
 
 
+    # indexxing the database to improve the performance
+    class Meta:
+        """ Meta class for indexing the database"""
+        indexes = [
+            models.Index(fields=['CreatedBy','title', 'createdAt', 'dueDate']),
+        ]
+
+
     def __str__(self):
         """ returns the object of the task"""
-        return str(self.title)
+        return str(self.title, self.description, self.dueDate, self.status, self.createdAt, self.updatedAt, self.priority, self.createdBy, self.assignedTo, self.tags)
 
     def was_creating_recently(self):
         """ returns the task created recently """

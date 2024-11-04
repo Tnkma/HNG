@@ -124,6 +124,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Redis cache settings
+# This is used to cache the API responses to improve the performance of the API
 CACHES = {
     'DEFAULT': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -132,4 +135,21 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
+}
+
+# Trottles helps to limit the number of requests that can be made to the API
+# in a given time frame. This is useful to prevent abuse of the API.
+# Example here
+# A user is limited to 10 requests per minute
+# While an anonymous user is limited to 5 requests per minute
+# This can be changed to any number of requests per minute
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/min',
+        'user': '10/min',
+    },
 }

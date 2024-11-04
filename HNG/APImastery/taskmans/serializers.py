@@ -21,3 +21,4 @@ class TaskSerializer(serializers.ModelSerializer):
         """ serializer for the task model """
         model = Task
         fields = '__all__'
+        read_only_fields = ['createdBy', 'createdAt', 'updatedAt']
