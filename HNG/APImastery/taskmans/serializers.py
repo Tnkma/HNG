@@ -1,40 +1,45 @@
 from rest_framework import serializers
-from .models import User, Task
+from .models import User, Task, TaskTags, AssignedTo
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User model."""
     
-    full_name = serializers.SerializerMethodField()
+    # full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'password', 'full_name']
+        fields = ['id', 'email', 'username', 'password']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True, 'required': True},
         }
-
-    def get_full_name(self, obj):
-        """Return the full name of the user."""
-        return f'{obj.email} {obj.username}'
-
+        
 class TaskSerializer(serializers.ModelSerializer):
     """Serializer for the Task model."""
     
     createdBy = UserSerializer(read_only=True)
-    assignedTo = UserSerializer(read_only=True)
 
     class Meta:
         model = Task
-        fields = '__all__'
-        read_only_fields = ['created_by', 'created_at', 'updated_at']
+        fields = ['title','description', 'due_date', 'status', 'createdAt', 'updatedAt', 'priority', 'createdBy']
+        read_only_fields = ['createdBy', 'createdAt', 'updatedAt']
 
-    def create(self, validated_data):
-        """Override create method to handle task creation."""
-        # Extract user data from the validated_data if needed
-        created_by_data = validated_data.pop('createdBy')
-        assigned_to_data = validated_data.pop('assignedTo')
+class TaskTagsSerializer(serializers.ModelSerializer):
+    """Serializer for the TaskTags model."""
+    
+    name = serializers.CharField(max_length=50)
+    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
+    
+    class Meta:
+        model = TaskTags
+        fields = ['name', 'task']
 
-        # Create task instance
-        task = Task.objects.create(**validated_data, createdBy=created_by_data, assignedTo=assigned_to_data)
 
-        return task
+class AssignedToSerializer(serializers.ModelSerializer):
+    """Serializer for the AssignedTo model."""
+    
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
+    
+    class Meta:
+        model = AssignedTo
+        fields = ['user', 'task']

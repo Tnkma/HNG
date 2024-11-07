@@ -128,7 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Redis cache settings
 # This is used to cache the API responses to improve the performance of the API
 CACHES = {
-    'DEFAULT': {
+    'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
@@ -153,3 +153,10 @@ REST_FRAMEWORK = {
         'user': '10/min',
     },
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
