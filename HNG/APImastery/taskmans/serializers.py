@@ -8,10 +8,21 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'password']
+        fields = ['id', 'email', 'name', 'password']
         extra_kwargs = {
             'password': {'write_only': True, 'required': True},
         }
+    
+    def create(self, validated_data):
+        """ Hash the passowrd before saving the user. """
+        user = User(
+            name=validated_data['name'],
+            email=validated_data['email']
+        )
+        user.set_password(validated_data['password'])
+        print(user)
+        user.save()
+        return user
         
 class TaskSerializer(serializers.ModelSerializer):
     """Serializer for the Task model."""
@@ -20,8 +31,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['title','description', 'due_date', 'status', 'createdAt', 'updatedAt', 'priority', 'createdBy']
-        read_only_fields = ['createdBy', 'createdAt', 'updatedAt']
+        fields = ['title','description', 'due_date', 'status', 'createdAt', 'priority', 'createdBy']
+        read_only_fields = ['createdBy', 'createdAt']
 
 class TaskTagsSerializer(serializers.ModelSerializer):
     """Serializer for the TaskTags model."""

@@ -1,22 +1,20 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import AbstractUser
 import datetime
 from django.db import models
 from django.utils import timezone
 
 # models for the api
 
-class User(models.Model):
+class User(AbstractUser):
     """User model representing a user in the system."""
-    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=250)
     email = models.EmailField(max_length=254, unique=True)
-    username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=128, blank=False)
+    username = None
     
-    def save(self, *args, **kwargs):
-        """Hash the password before saving to the model."""
-        if self.password and not self.password.startswith('pbkdf2_sha256'):
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    
 
     def __str__(self):
         """Return the username of the user."""
@@ -36,13 +34,14 @@ class Task(models.Model):
         ("C", "Completed"),
         ("I", "In Progress"),
     ]
+    id = models.AutoField(primary_key=True)
 
     title = models.CharField(max_length=200)
     description = models.TextField()
     due_date = models.DateField()
     status = models.CharField(max_length=1, choices=STATUS)
     createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=True)
+    updatedAt = models.DateTimeField(auto_now=False)
     priority = models.CharField(max_length=1, choices=PRIORITY)
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tasks')
 
@@ -52,6 +51,14 @@ class Task(models.Model):
         indexes = [
             models.Index(fields=['createdBy', 'title', 'createdAt', 'due_date']),
         ]
+    
+    def save(self, *args, **kwargs):
+        """Override the save method to update the updated time."""
+        if self.pk is not None:
+            existing_task = Task.objects.get(pk=self.pk)
+            if self.title != existing_task.title or self.description != existing_task.description:
+                self.updatedAt = timezone.now()
+        super(Task, self).save(*args, **kwargs)
 
     def __str__(self):
         """Return a string representation of the task."""
