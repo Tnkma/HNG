@@ -1,6 +1,21 @@
 """ Urls path for the app taskmans. """
 from django.urls import path
-from .views import UserDetail, TaskList, TaskDetail, UserSignup, UserLogin
+from .views import (
+    UserSignup,
+    UserLogin,
+    UserDetail,
+    UserLogout,
+
+    TaskList,
+    TaskDetail,
+    TaskCreate,
+    TaskSearch,
+    # TaskUpdate,
+    # TaskDelete,
+
+    TagView
+    
+)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -10,19 +25,29 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     # List all tasks on the homepage
     path('', TaskList.as_view(), name='task-list'),
+    path('search/', TaskSearch.as_view(), name='task-search'),
+    
+    
+    
+    
     # create a new user
-    path('SignUp/', UserSignup.as_view(), name='user-create'),
-    path('Signin/', UserLogin.as_view(), name='user-login'),
+    path('users/register/', UserSignup.as_view(), name='user-create'),
+    path('users/login/', UserLogin.as_view(), name='user-login'),
+    
     
     # view each user details clicked with the user id
-    path('Login/', UserDetail.as_view(), name='user-login'),
     path('<int:pk>/', UserDetail.as_view(), name='user-detail'),
     # user id and update the user
     path('<int:pk>/update/', UserDetail.as_view(), name='user-update'),
+    path('users/logout/', UserLogout.as_view(), name='user-logout'),
     # user id and delete the user
     path('<int:pk>/delete/', UserDetail.as_view(), name='user-delete'),
+    
+    
+    
+    
     # create a new task
-    path('create_task/', TaskList.as_view(), name='create_tasks'),
+    path('create_task/', TaskCreate.as_view(), name='create_tasks'),
     # view each task clicked with the task id
     path('tasks/<int:pk>/', TaskDetail.as_view(), name='task-detail'),
     # task id and update the task
@@ -33,6 +58,8 @@ urlpatterns = [
     # JWT token views
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    
+    
+    path('/tags/', TagView.as_view(), name='tags'),
     
 ]
