@@ -87,6 +87,7 @@ class TaskCreate(APIView):
 @method_decorator(cache_page(60), name='dispatch')
 class TaskDetail(RetrieveUpdateDestroyAPIView):
     """View for retrieving, updating, and deleting a task."""
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 

@@ -4,7 +4,7 @@ from .views import (
     UserSignup,
     UserLogin,
     UserDetail,
-    UserLogout,
+    Logout,
 
     TaskList,
     TaskDetail,
@@ -34,14 +34,14 @@ urlpatterns = [
     path('users/register/', UserSignup.as_view(), name='user-create'),
     path('users/login/', UserLogin.as_view(), name='user-login'),
     
-    
-    # view each user details clicked with the user id
-    path('<int:pk>/', UserDetail.as_view(), name='user-detail'),
+
+    # view each user details clicked wit    h the user id
+    path('users/<int:pk>/', UserDetail.as_view(), name='user-detail'),
     # user id and update the user
-    path('<int:pk>/update/', UserDetail.as_view(), name='user-update'),
-    path('users/logout/', UserLogout.as_view(), name='user-logout'),
+    path('users/<int:pk>/update/', UserDetail.as_view(), name='user-update'),
+    path('users/users/logout/', Logout.as_view(), name='user-logout'),
     # user id and delete the user
-    path('<int:pk>/delete/', UserDetail.as_view(), name='user-delete'),
+    path('users/<int:pk>/delete/', UserDetail.as_view(), name='user-delete'),
     
     
     
@@ -60,6 +60,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     
-    path('/tags/', TagView.as_view(), name='tags'),
+    path('tags/', TagView.as_view(), name='tags'),
     
 ]
