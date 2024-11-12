@@ -71,6 +71,7 @@ class TaskList(ListAPIView):
     """View for listing tasks."""
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    # All users can view tasks
     permission_classes = []
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
@@ -92,12 +93,17 @@ class TaskDetail(RetrieveUpdateDestroyAPIView):
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     def get_queryset(self):
-        return Task.objects.filter(createdBy=self.request.user.id)
+        """ Return only tasks created by the current user and task assigned to the user """
+        user = self.request.user
+        return Task.objects.filter(createdBy=user) | Task.objects.filter(AssignedTo=user)
 
 @method_decorator(cache_page(60), name='dispatch')
 class TaskSearch(ListAPIView):
     """View for searching tasks."""
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    # All users can search for tasks
+    permission_classes = []
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['title', 'description', 'status', 'createdBy', 'AssignedTo', 'dueDate']
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
@@ -122,30 +128,47 @@ class TagView(APIView):
     
     def post(self, request):
         """Add a tag to a task, creating the tag if it doesn't exist."""
-        task_id = request.data.get('task')
-        tag_name = request.data.get('name')
+        serializer = TaskTagsSerializer(data=request.data)
         
-        try:
-            task = Task.objects.get(id=task_id)
-            
-            # Ensure the user is the task's creator
-            if task.createdBy != request.user:
-                raise PermissionDenied("You do not have permission to modify tags for this task.")
-            
-            # Check if the tag already exists on the task
-            tag, created = TaskTagsSerializer.objects.get_or_create(name=tag_name)
-            if task.tags.filter(id=tag.id).exists():
+        if serializer.is_valid():
+            task_id = serializer.validated_data('user')
+            tag_name =serializer.validated_data('name')
+            try:
+                task = Task.objects.get(id=task_id)
+                
+                # Ensure the user is the task's creator
+                if task.createdBy != request.user:
+                    raise PermissionDenied("You do not have permission to modify tags for this task.")
+                
+                # Check if the tag already exists on the task
+                tag, created = TaskTagsSerializer.objects.get_or_create(name=tag_name)
+                if task.tags.filter(id=tag.id).exists():
+                    return Response({
+                        'message': 'Tag already exists on this task.',
+                        'tag': TaskTagsSerializer(tag).data
+                    }, status=status.HTTP_200_OK)
+                
+                # Otherwise, add the new tag
+                task.tags.add(tag)
                 return Response({
-                    'message': 'Tag already exists on this task.',
+                    'message': 'Tag added successfully',
                     'tag': TaskTagsSerializer(tag).data
-                }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_201_CREATED)
             
-            # Otherwise, add the new tag
-            task.tags.add(tag)
-            return Response({
-                'message': 'Tag added successfully',
-                'tag': TaskTagsSerializer(tag).data
-            }, status=status.HTTP_201_CREATED)
+            except Task.DoesNotExist:
+                return Response({'message': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class UserDelete(APIView):
+    """ View for deleting a user."""
+    
+    def post(self, request):
+        """ Delete the current user. """
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user_id = serializer.validated_data.get('user')
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response({'message': 'Acount deleted successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         
-        except Task.DoesNotExist:
-            return Response({'message': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -5,6 +5,7 @@ from .views import (
     UserLogin,
     UserDetail,
     Logout,
+    UserDelete,
 
     TaskList,
     TaskDetail,
@@ -41,7 +42,7 @@ urlpatterns = [
     path('users/<int:pk>/update/', UserDetail.as_view(), name='user-update'),
     path('users/users/logout/', Logout.as_view(), name='user-logout'),
     # user id and delete the user
-    path('users/<int:pk>/delete/', UserDetail.as_view(), name='user-delete'),
+    path('users/<int:pk>/delete/', UserDelete.as_view(), name='user-delete'),
     
     
     
