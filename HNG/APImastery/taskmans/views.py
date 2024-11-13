@@ -19,22 +19,18 @@ class UserSignup(APIView):
     
     def post(self, request):
         serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        
-        # Email subject and message
-        subject = 'New User Signed Up'
-        message = (
-            f"A new user has signed up:\n\n"
-            f"Name: {user.username}\n"
-            f"Email: {user.email}\n\n"
-            "Login to the admin panel to view more details."
-        )
-        
-        # Send the email to the new user
-        send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
+
+class GetUsers(ListAPIView):
+    permission_classes = []
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+        
 
 class UserLogin(APIView):
     """View for logging in a user."""
@@ -158,17 +154,5 @@ class TagView(APIView):
             except Task.DoesNotExist:
                 return Response({'message': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class UserDelete(APIView):
-    """ View for deleting a user."""
-    
-    def post(self, request):
-        """ Delete the current user. """
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user_id = serializer.validated_data.get('user')
-            user = User.objects.get(id=user_id)
-            user.delete()
-            return Response({'message': 'Acount deleted successfully'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         

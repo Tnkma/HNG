@@ -41,11 +41,11 @@ class Task(models.Model):
     due_date = models.DateField()
     status = models.CharField(max_length=1, choices=STATUS)
     createdAt = models.DateTimeField(auto_now_add=True)
-    updatedAt = models.DateTimeField(auto_now=False)
+    updatedAt = models.DateTimeField(auto_now=True)
     priority = models.CharField(max_length=1, choices=PRIORITY)
     createdBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tasks')
 
-    # Indexing the database helps to improve the performance of the database
+    # Index database
     class Meta:
         """Meta class for indexing the database."""
         indexes = [
