@@ -15,11 +15,12 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -87,7 +88,7 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'default_db_name'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': '3306',
     }
 }
