@@ -35,7 +35,7 @@ Build a scalable RESTFUL API system for task management that enables users to cr
     ```
 2. Navigate to the project directory:
     ```sh
-    cd Http-fetch/HNG/APImastery
+    cd HNG
     ```
 3. Install the dependencies:
     ```sh
