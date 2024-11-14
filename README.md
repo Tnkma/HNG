@@ -31,7 +31,7 @@ Build a scalable RESTFUL API system for task management that enables users to cr
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/Tnkma/Http-fetch.git
+    https://github.com/Tnkma/HNG.git
     ```
 2. Navigate to the project directory:
     ```sh
@@ -45,12 +45,13 @@ Build a scalable RESTFUL API system for task management that enables users to cr
 ## Environment Variables
 
 Create a `.env` file in the root directory and add the following variables:
-DJANGO_SECRET_KEY=<your_django_secret_key>
-MYSQL_DATABASE=<your_database_name>
-MYSQL_USER=<your_database_user>
-MYSQL_PASSWORD=<your_database_password>
-MYSQL_HOST=<your_database_host>
-REDIS_URL=<your_redis_url>
+
+- DJANGO_SECRET_KEY=<your_django_secret_key>
+- MYSQL_DATABASE=<your_database_name>
+- MYSQL_USER=<your_database_user>
+- MYSQL_PASSWORD=<your_database_password>
+- MYSQL_HOST=<your_database_host>
+- REDIS_URL=<your_redis_url>
 
 
 ## Usage
