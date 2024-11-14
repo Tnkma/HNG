@@ -9,11 +9,13 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
+from dotenv import load_dotenv
 import os
 from pathlib import Path
 from datetime import timedelta
+from django.conf import settings
 
-from dotenv import load_dotenv
 
 
 load_dotenv()
@@ -43,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'taskmans',
+    'api',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -176,7 +178,7 @@ REST_FRAMEWORK = {
 }
 
 
-AUTH_USER_MODEL = 'taskmans.User' 
+AUTH_USER_MODEL = 'api.User' 
 
 # JWT token settings
 
@@ -188,7 +190,7 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": os.environ.get('JWT_SECRET'),
+    "SIGNING_KEY": settings.SECRET_KEY,
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,

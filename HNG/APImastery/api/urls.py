@@ -1,4 +1,4 @@
-""" Urls path for the app taskmans. """
+""" Urls path for the app api. """
 from django.urls import path
 from .views import (
     UserSignup,
@@ -27,7 +27,7 @@ urlpatterns = [
     # List all tasks on the homepage
     path('', TaskList.as_view(), name='task-list'),
     path('search/', TaskSearch.as_view(), name='task-search'),
-    path('users/allusers/', GetUsers.as_view(), name='allusers'),
+    # path('users/allusers/', GetUsers.as_view(), name='allusers'),
     
     
     
@@ -62,6 +62,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     
-    path('tags/', TagView.as_view(), name='tags'),
+    # path('tags/', TagView.as_view(), name='tags'),
     
 ]
