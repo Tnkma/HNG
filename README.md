@@ -79,6 +79,10 @@ GET /api/tasks/:id/: Get a task by ID
 PUT /api/tasks/:id/update/: Update a task by ID
 DELETE /api/tasks/:id/delete/: Delete a task by ID
 
+Paginations:
+GET /api/tasks/search/?limit=100&offset=0
+GET /api/tasks/?limit=100&offset=0
+
 
 Error Handling
 The API includes comprehensive error handling for all endpoints, ensuring proper status codes and messages are returned.

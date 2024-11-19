@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api',
+    'users',
+    'tasks',
+    'tags',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -178,7 +180,7 @@ REST_FRAMEWORK = {
 }
 
 
-AUTH_USER_MODEL = 'api.User' 
+AUTH_USER_MODEL = 'users.User' 
 
 # JWT token settings
 
@@ -220,4 +222,9 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
 }
