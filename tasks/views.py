@@ -1,5 +1,5 @@
 from rest_framework import status, filters
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
@@ -9,6 +9,7 @@ from django.views.decorators.cache import cache_page
 from tasks.models import Task
 from tasks.serializers import TaskSerializer
 from django.core.cache import cache
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -23,7 +24,7 @@ class TaskList(ListAPIView):
 
 class TaskCreate(APIView):
     """View for creating a task."""
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = TaskSerializer(data=request.data)
@@ -36,13 +37,21 @@ class TaskCreate(APIView):
 @method_decorator(cache_page(300), name='dispatch')
 class TaskDetail(APIView):
     """Retrieve, update or delete a task."""
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     def get(self, request, *args, **kwargs):
         task_id = kwargs.get('task_id')
-        task = Task.objects.filter(id=task_id).first() | Task.objects.filter(AssignedTo=task_id).first()
-        
+        task = Task.objects.filter(
+                id=task_id,
+                assignedto=request.user
+                ).first()
+        if not task:
+            task = Task.objects.filter(
+                        id=task_id,
+                        created_by=task_id
+                        ).first()
+            
         if not task:
             return Response({'detail': 'Task not found.'}, status=404)
         
