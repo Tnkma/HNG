@@ -11,7 +11,7 @@ from users.views import (
 urlpatterns = [
     path('allusers/', GetUsers.as_view(), name='allusers'),
     # create a new user
-    path('register/', UserSignup.as_view(), name='user-create'),
+    path('register/', UserSignup.as_view(), name='register'),
     path('login/', UserLogin.as_view(), name='user-login'),
     
 

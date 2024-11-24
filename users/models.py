@@ -7,13 +7,13 @@ from django.utils import timezone
 
 class User(AbstractUser):
     """User model representing a user in the system."""
-    name = models.CharField(max_length=250)
+    username = models.CharField(max_length=250, blank=False)
     email = models.EmailField(max_length=254, unique=True)
-    password = models.CharField(max_length=128, blank=False)
-    username = None
+    
+    
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
     
 
     def __str__(self):
