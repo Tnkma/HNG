@@ -19,16 +19,15 @@ class UserCaseTest(APITestCase):
             "email": "test2@gmail.com",
             "password": "password2"
         }
-        self.register_url = reverse('register')
         return super().setUp()
     
     def test_create_user(self):
         """ use client.post to send data to api/register"""
-        response = self.client.post(self.register_url, self.user_data, format='json')
-        print(response.url, response.status_code)
-        print(response.data, response.data['username'])
+        response = self.client.post('/api/register/', self.user_data)
         
         # check if the creation is successful
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['username'], 'example2')
         self.assertEqual(response.data['email'], 'test2@gmail.com')
+    
+    

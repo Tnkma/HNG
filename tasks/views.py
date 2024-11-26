@@ -4,22 +4,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from tasks.models import Task
 from tasks.serializers import TaskSerializer
-from django.core.cache import cache
 from rest_framework.permissions import IsAuthenticated
+from APImastery.redis_client import redis_client
+from django.db.models import Q
+from django.db.utils import DatabaseError
+from redis.exceptions import RedisError
 
 
 
-@method_decorator(cache_page(60), name='dispatch')
 class TaskList(ListAPIView):
     """View for listing tasks."""
+    # on home, you will see the list of task created or assigned to you
+    # we can also allow user accept certain task to or decline
+    # we might also share the task via messages or email.
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    # All users can view tasks
-    permission_classes = []
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
 class TaskCreate(APIView):
@@ -34,7 +35,6 @@ class TaskCreate(APIView):
 
 
 # Cache for 5 minutes
-@method_decorator(cache_page(300), name='dispatch')
 class TaskDetail(APIView):
     """Retrieve, update or delete a task."""
     permission_classes = [IsAuthenticated]
@@ -42,14 +42,17 @@ class TaskDetail(APIView):
 
     def get(self, request, *args, **kwargs):
         task_id = kwargs.get('task_id')
+        
+        # try and get from redis
+        
         task = Task.objects.filter(
                 id=task_id,
-                assignedto=request.user
+                AssignedTo=request.user
                 ).first()
         if not task:
             task = Task.objects.filter(
                         id=task_id,
-                        created_by=task_id
+                        createdBy=task_id
                         ).first()
             
         if not task:
@@ -70,7 +73,7 @@ class TaskDetail(APIView):
         if serializer.is_valid():
             serializer.save()
             # After update, clear cache for this task so that fresh data is served
-            cache.delete(f"task_{task_id}")
+            #cache.delete(f"task_{task_id}")
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
     
@@ -78,17 +81,45 @@ class TaskDetail(APIView):
         # Similar to PUT, handle partial updates
         return self.put(request, *args, **kwargs)
 
-@method_decorator(cache_page(60), name='dispatch')
+
 class TaskSearch(ListAPIView):
     """View for searching tasks."""
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    # All users can search for tasks
-    permission_classes = []
+    # only is_authen users can search for tasks
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['title', 'description', 'status', 'createdBy', 'AssignedTo', 'dueDate']
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
+    
     def get_queryset(self):
+        """ retrive Tasklist from redis first before db"""
         user = self.request.user
-        return Task.objects.filter(createdBy=user) | Task.objects.filter(AssignedTo=user)
+        
+        cache_key = f"user{user.id}_tasks"
+        # get the task createdBY and task AssignedTo
+        
+        # try to get from redis
+        try:
+            task_data = redis_client.get(cache_key)
+            if task_data:
+                # deserialize data
+                task_data = TaskSerializer(data=task_data, many=True).data
+        except RedisError as err:
+            # Log the Redis error (optional)
+            print(f"Redis error: {err}")
+        
+        try:
+            # get from the database
+            task_data = self.queryset.filter(Q(createdBy=user) | Q(AssignedTo=user))
+            # cache the task_data
+            if task_data:
+                serilaizer = TaskSerializer(task_data, many=True).data
+                redis_client.set(cache_key, serilaizer, timeout=300)
+            else:
+                return Response({'details': 'No Task found for this user'}, status=404)
+        except DatabaseError as dataerr:
+            # log the database error
+            print(f"Database: {dataerr}")
+        return task_data

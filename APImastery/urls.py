@@ -9,8 +9,8 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
-    path('api/tasks/', include('tasks.urls')),
-    path('api/tags/', include('tags.urls')),
+    path('api/', include('tasks.urls')),
+    path('api/', include('tags.urls')),
     
     # JWT token views
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
