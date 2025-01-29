@@ -11,6 +11,6 @@ class MyInfo(APIView):
         data = {
             "email": "onwusilikenonso@gmail.com",
             "current_datetime": datetime.now(pytz.utc).strftime("%Y-%m-%d %H:%M:%S"),
-            "github_url": ""
+            "github_url": "https://github.com/Tnkma/HNG/tree/main/HNGIntern/stage0/BasicInfo"
         }
         return Response(data)
