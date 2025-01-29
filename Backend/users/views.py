@@ -33,16 +33,18 @@ class GetUsers(ListAPIView):
 
 class UserLogin(APIView):
     """View for logging in a user."""
-    # permission_classes = []
     
     def post(self, request):
+        """ post the arguments received """
         email = request.data.get('email')
         password = request.data.get('password')
-        user = User.objects.filter(email=email).first()
         
+        user = User.objects.filter(email=email).first()
+
+        # invalid email and wrong passowrd
         if not user or not user.check_password(password):
             raise AuthenticationFailed('Invalid credentials')
-        
+
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         return Response({
